@@ -183,7 +183,7 @@ async def run(config: AppConfig, args: argparse.Namespace) -> RunContext:
             logger.info(f"Processing source: {source.name} ({source.type})")
             
             try:
-                videos = resolve_source(source, cookies_file=config.settings.cookies_file)
+                videos = resolve_source(source, cookies_file=config.settings.cookies_file, run_id=run_id)
             except Exception as e:
                 logger.error(f"Failed to resolve source {source.name}: {e}")
                 continue
