@@ -171,9 +171,9 @@ async def run(config: AppConfig, args: argparse.Namespace) -> RunContext:
         reconcile_result = await reconciler.run(sqlite, neon, dry_run=dry_run)
         logger.info(f"Reconciliation summary: {reconcile_result}")
 
-        downloader = Downloader()
-        encoder = Encoder()
-        storage_router = StorageRouter()
+        downloader = Downloader(ffmpeg_path, config.settings.cookies_file)
+        encoder = Encoder(ffmpeg_path)
+        storage_router = StorageRouter(config, rclone_path)
         
         sources_to_run = config.sources
         if args.source:
