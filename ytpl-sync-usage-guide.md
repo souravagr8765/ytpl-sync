@@ -92,7 +92,7 @@ rclone lsd gdrive1:
 
 ```bash
 # 1. Clone or download the project
-git clone https://github.com/you/ytpl-sync.git
+git clone https://github.com/souravagr8765/ytpl-sync.git
 cd ytpl-sync
 
 # 2. Create a virtual environment (recommended)
