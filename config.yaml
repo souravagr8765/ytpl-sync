@@ -1,0 +1,73 @@
+settings:
+  ffmpeg_path: null           # null = auto-detect from PATH
+  rclone_path: null
+  temp_dir: null              # null = system temp
+  lock_file: "~/.ytpl-sync.lock"
+  log_file: "~/.ytpl-sync.log"
+  min_free_gb: 5
+  only_run_between: null      # "HH:MM-HH:MM" or null
+  ytdlp_auto_update: false
+  cookies_file: null
+  max_retries: 3
+  dry_run: false
+
+encoding:
+  enabled: true
+  encoder: "software"         # software | nvenc | vaapi | videotoolbox
+  preset: "medium"
+  crf: 28
+  audio_bitrate: "96k"
+
+quality:
+  max_resolution: 1080        # 480 | 720 | 1080 | 1440 | 2160
+  prefer_format: "webm"       # webm | mp4 | any
+
+destination:
+  mode: "local"               # local | gdrive
+  local:
+    path: "./ytpl-downloads"
+  # gdrive:
+  #   accounts:
+  #     - name: "drive-account-1"
+  #       rclone_remote: "gdrive1"
+  #       quota_gb: 15
+  #       upload_folder: "YT-Lectures"
+
+notifications:
+  email:
+    enabled: true
+    send_report_on_activity: true
+    send_on_failure: true
+  telegram:
+    enabled: true
+    send_report_on_activity: true
+    send_on_failure: true
+
+sources:
+  - type: "playlist"
+    name: "Chanakya 3.0 Economics Playlist"
+    url: "https://www.youtube.com/playlist?list=PLxSsE7nAS4Iz83CxA9g-44z8dRQsG-yeO"
+    # optional per-source overrides:
+    destination:
+      mode: "local"
+      local:
+        path: "./ytpl-downloads/Chanakya 3.0 Economics"
+    encoding:
+      enabled: true
+    quality:
+      max_resolution: 720
+      crf: 30
+      preset: "fast"
+
+  # - type: "channel"
+  #   name: "Example Channel"
+  #   url: "https://youtube.com/@example"
+  #   filters:
+  #     after_date: "2023-01-01"       # only videos uploaded on/after this date
+  #     keywords: ["lecture", "math"]  # title must contain at least one keyword (case-insensitive)
+  #     exclude_keywords: ["shorts", "livestream"]
+  #     min_duration_seconds: 300
+  #     max_duration_seconds: 7200
+  #   encoding:
+  #     crf: 24
+  #     preset: "slow"

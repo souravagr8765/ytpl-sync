@@ -1,0 +1,2 @@
+[console_scripts]
+ytpl-sync = ytpl_sync.main:cli
