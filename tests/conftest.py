@@ -25,7 +25,7 @@ def sample_video():
         upload_date="20231010",
         duration_seconds=120,
         status=VideoStatus.PENDING,
-        url="https://youtube.com/watch?v=test_vid_123",
+        youtube_url="https://youtube.com/watch?v=test_vid_123",
     )
 
 @pytest.fixture

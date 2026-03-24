@@ -114,15 +114,17 @@ class AppConfig(BaseModel):
                 return model.model_dump()
             return model.dict()
 
-        result = {
-            "destination": dump_model(source.destination) if source.destination else dump_model(self.destination),
-            "encoding": dump_model(self.encoding),
-            "quality": dump_model(self.quality)
-        }
-        
+        dest_dict = dump_model(source.destination) if source.destination else dump_model(self.destination)
+        enc_dict = dump_model(self.encoding)
         if source.encoding:
-            result["encoding"].update(source.encoding)
-        if source.quality:
-            result["quality"].update(source.quality)
+            enc_dict.update(source.encoding)
             
-        return result
+        qual_dict = dump_model(self.quality)
+        if source.quality:
+            qual_dict.update(source.quality)
+            
+        return {
+            "destination": DestinationConfig(**dest_dict),
+            "encoding": EncodingConfig(**enc_dict),
+            "quality": QualityConfig(**qual_dict)
+        }

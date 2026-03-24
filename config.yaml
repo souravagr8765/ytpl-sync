@@ -9,7 +9,7 @@ settings:
   ytdlp_auto_update: false
   cookies_file: null
   max_retries: 3
-  dry_run: true
+  dry_run: false
 
 encoding:
   enabled: true

@@ -18,46 +18,28 @@ class Downloader:
         self.ffmpeg_path = ffmpeg_path
         self.cookies_file = cookies_file
 
-    def download(self, video_meta: dict, output_dir: str, quality_config, run_id: str) -> Video:
+    def download(self, video: Video, output_dir: str, quality_config, run_id: str) -> Video:
         """
         Downloads a single video. Returns a Video object with status DOWNLOADED or FAILED.
         """
         # Safety net: Never re-download if status is already complete.
-        status = video_meta.get("status")
-        if status is not None:
-            assert status not in (
-                VideoStatus.DOWNLOADED.value,
-                VideoStatus.ENCODED.value,
-                VideoStatus.UPLOADING.value,
-                VideoStatus.UPLOADED.value,
-                VideoStatus.DOWNLOADED,
-                VideoStatus.ENCODED,
-                VideoStatus.UPLOADING,
-                VideoStatus.UPLOADED,
-            ), f"Safety net: Attempted to download video {video_meta.get('video_id')} which has status {status}"
+        if video.status in (
+            VideoStatus.DOWNLOADED.value,
+            VideoStatus.ENCODED.value,
+            VideoStatus.UPLOADING.value,
+            VideoStatus.UPLOADED.value,
+            VideoStatus.DOWNLOADED,
+            VideoStatus.ENCODED,
+            VideoStatus.UPLOADING,
+            VideoStatus.UPLOADED,
+        ):
+            logger.warning(f"Safety net: Attempted to download video {video.video_id} which has status {video.status}")
+            return video
 
-        # 1. Build a Video object from video_meta
-        video = Video(
-            video_id=video_meta.get("video_id", ""),
-            source_name=video_meta.get("source_name", ""),
-            source_type=video_meta.get("source_type", ""),
-            source_url=video_meta.get("source_url", ""),
-            run_id=run_id,
-            title=video_meta.get("title"),
-            description=video_meta.get("description"),
-            channel_name=video_meta.get("channel_name"),
-            channel_id=video_meta.get("channel_id"),
-            upload_date=video_meta.get("upload_date"),
-            duration_seconds=video_meta.get("duration_seconds"),
-            view_count=video_meta.get("view_count"),
-            like_count=video_meta.get("like_count"),
-            thumbnail_url=video_meta.get("thumbnail_url"),
-            tags=video_meta.get("tags"),
-            categories=video_meta.get("categories"),
-            youtube_url=video_meta.get("youtube_url"),
-            status=VideoStatus.DOWNLOADING,
-            download_started_at=now()
-        )
+        # 1. Update video status for download start
+        video.status = VideoStatus.DOWNLOADING
+        video.download_started_at = now()
+        video.run_id = run_id
 
         # 2. Build yt-dlp format selector based on quality_config
         res = quality_config.max_resolution
@@ -87,9 +69,10 @@ class Downloader:
             ydl_opts["cookiefile"] = self.cookies_file
 
         try:
-            # 4. Run yt_dlp.YoutubeDL(ydl_opts).download([video_meta['url']]).
+            # 4. Run yt_dlp.YoutubeDL(ydl_opts).download
+            url_to_download = video.youtube_url or f"https://www.youtube.com/watch?v={video.video_id}"
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([video_meta["url"]])
+                ydl.download([url_to_download])
 
             # 5. Find the downloaded file (glob output_dir/video_id.*).
             search_pattern = os.path.join(output_dir, f"{video.video_id}.*")
