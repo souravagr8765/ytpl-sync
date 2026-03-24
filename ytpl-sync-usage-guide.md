@@ -95,15 +95,12 @@ rclone lsd gdrive1:
 git clone https://github.com/souravagr8765/ytpl-sync.git
 cd ytpl-sync
 
-# 2. Create a virtual environment (recommended)
-python3 -m venv .venv
+# 2. Install dependencies
+# Linux / macOS / Termux:
+./setup.sh
 
-# Activate it:
-source .venv/bin/activate        # Linux / macOS / Termux
-.venv\Scripts\activate           # Windows
-
-# 3. Install the app
-pip install -e .
+# Windows:
+setup.bat
 ```
 
 ---
@@ -197,7 +194,7 @@ sources:
 ### Always do a dry run first
 
 ```bash
-ytpl-sync --dry-run
+python main.py --dry-run
 ```
 
 This goes through the full flow — resolves videos, checks DB, prints exactly what it would download/encode/upload — but touches nothing. Verify the output looks right before a real run.
@@ -207,13 +204,13 @@ This goes through the full flow — resolves videos, checks DB, prints exactly w
 ### Normal run
 
 ```bash
-ytpl-sync
+python main.py
 ```
 
 With a specific config file:
 
 ```bash
-ytpl-sync --config /path/to/my-config.yaml
+python main.py --config /path/to/my-config.yaml
 ```
 
 ---
@@ -223,7 +220,7 @@ ytpl-sync --config /path/to/my-config.yaml
 Useful for testing a single playlist or channel without running all sources:
 
 ```bash
-ytpl-sync --source "MIT Algorithms"
+python main.py --source "MIT Algorithms"
 ```
 
 ---
@@ -231,7 +228,7 @@ ytpl-sync --source "MIT Algorithms"
 ### Check version
 
 ```bash
-ytpl-sync --version
+python main.py --version
 ```
 
 ---
@@ -248,15 +245,10 @@ Add a line. Examples:
 
 ```bash
 # Run every day at 3am
-0 3 * * * /path/to/.venv/bin/ytpl-sync --config /path/to/config.yaml
+0 3 * * * cd /home/yourname/ytpl-sync && /usr/bin/python main.py --config /path/to/config.yaml
 
 # Run every 6 hours
-0 */6 * * * /path/to/.venv/bin/ytpl-sync --config /path/to/config.yaml
-```
-
-Find your venv path:
-```bash
-which ytpl-sync   # run this after activating the venv
+0 */6 * * * cd /home/yourname/ytpl-sync && /usr/bin/python main.py --config /path/to/config.yaml
 ```
 
 > **Important for cron:** cron doesn't load your shell environment, so use absolute paths everywhere — both in the cron line and in your `config.yaml` (avoid `~`, use `/home/yourname/...`).
@@ -266,9 +258,8 @@ Alternatively, use a small wrapper script:
 ```bash
 #!/bin/bash
 # ~/run-ytpl-sync.sh
-source /home/yourname/ytpl-sync/.venv/bin/activate
 cd /home/yourname/ytpl-sync
-ytpl-sync --config config.yaml
+python main.py --config config.yaml
 ```
 
 ```bash
@@ -280,10 +271,9 @@ chmod +x ~/run-ytpl-sync.sh
 
 ---
 
-### Termux — cronie + Termux:Boot
+### Termux — cronie
 
-Install the required addons:
-- **Termux:Boot** from [F-Droid](https://f-droid.org) (not the Play Store)
+Install the required addon:
 - `pkg install cronie`
 
 Start the cron daemon:
@@ -296,25 +286,8 @@ Add to Termux crontab:
 crontab -e
 
 # Add (adjust paths as needed):
-0 3 * * * /data/data/com.termux/files/usr/bin/python /data/data/com.termux/files/home/ytpl-sync/.venv/bin/ytpl-sync
+0 3 * * * cd /data/data/com.termux/files/home/ytpl-sync && /data/data/com.termux/files/usr/bin/python main.py
 ```
-
-Auto-start crond on phone boot via Termux:Boot:
-```bash
-mkdir -p ~/.termux/boot
-nano ~/.termux/boot/start-crond.sh
-```
-
-```bash
-#!/data/data/com.termux/files/usr/bin/bash
-crond
-```
-
-```bash
-chmod +x ~/.termux/boot/start-crond.sh
-```
-
-crond will now start automatically whenever Termux launches after a reboot.
 
 ---
 
@@ -324,7 +297,8 @@ crond will now start automatically whenever Termux launches after a reboot.
 2. Name: `ytpl-sync`
 3. Trigger: Daily at your preferred time
 4. Action: Start a program
-   - Program: `C:\path\to\ytpl-sync\.venv\Scripts\ytpl-sync.exe`
+   - Program: `python`
+   - Add arguments: `main.py`
    - Start in: `C:\path\to\ytpl-sync\`
 5. Finish
 
@@ -552,11 +526,11 @@ sources:
 
 | Command | What it does |
 |---|---|
-| `ytpl-sync` | Normal run using `./config.yaml` |
-| `ytpl-sync --dry-run` | Simulate run, no downloads or uploads |
-| `ytpl-sync --config path/to/config.yaml` | Use a specific config file |
-| `ytpl-sync --source "Name"` | Run only the named source |
-| `ytpl-sync --version` | Print version and exit |
+| `python main.py` | Normal run using `./config.yaml` |
+| `python main.py --dry-run` | Simulate run, no downloads or uploads |
+| `python main.py --config path/to/config.yaml` | Use a specific config file |
+| `python main.py --source "Name"` | Run only the named source |
+| `python main.py --version` | Print version and exit |
 | `tail -f ~/.ytpl-sync.log` | Watch live logs |
 | `rm ~/.ytpl-sync.lock` | Remove stale lock file |
 | `rclone config reconnect gdrive1:` | Re-authenticate a Drive account |

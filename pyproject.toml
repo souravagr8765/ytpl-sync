@@ -23,8 +23,7 @@ dev = [
     "pytest-cov"
 ]
 
-[project.scripts]
-ytpl-sync = "ytpl_sync.main:cli"
+
 
 [tool.setuptools.dynamic]
 version = {file = "VERSION"}

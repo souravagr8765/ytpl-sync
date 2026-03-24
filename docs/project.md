@@ -33,7 +33,7 @@ Configurations are stored in `config.yaml` and mapped into `ytpl_sync.config`.
 Settings can be defined globally and optionally overridden per-source. All path accesses (e.g., `~/.ytpl-sync.lock`) automatically undergo tilde expansion (`Path.expanduser()`).
 
 ## Code Workflow
-1. **Startup**: Entry point `ytpl-sync` starts the run. Reads `config.yaml` and `.env`.
+1. **Startup**: Entry point `python main.py` starts the run. Reads `config.yaml` and `.env`.
 2. **Context Setup**: Initialize `RunContext` to track metrics. Acquire application lock (`lock.py`).
 3. **Database Reconcile**: Sync local state with remote Neon backend.
 4. **Resolution**: Iterate `config.sources`. Fetch definitions by querying `yt-dlp`. Compare against DB.
