@@ -1,18 +1,32 @@
 import os
 from pathlib import Path
 from typing import Optional, Literal, Dict, Any, List
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
+try:
+    from pydantic import field_validator
+    PYDANTIC_V2 = True
+except ImportError:
+    from pydantic import validator as field_validator
+    PYDANTIC_V2 = False
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class RootPathValidatorModel(BaseModel):
-    @field_validator('*', mode='before')
-    @classmethod
-    def expand_tilde(cls, v: Any) -> Any:
-        if isinstance(v, str) and v.startswith('~'):
-            return str(Path(v).expanduser())
-        return v
+    if PYDANTIC_V2:
+        @field_validator('*', mode='before')
+        @classmethod
+        def expand_tilde(cls, v: Any) -> Any:
+            if isinstance(v, str) and v.startswith('~'):
+                return str(Path(v).expanduser())
+            return v
+    else:
+        @field_validator('*', pre=True, allow_reuse=True)
+        @classmethod
+        def expand_tilde(cls, v: Any) -> Any:
+            if isinstance(v, str) and v.startswith('~'):
+                return str(Path(v).expanduser())
+            return v
 
 class SettingsConfig(RootPathValidatorModel):
     ffmpeg_path: Optional[str] = None
@@ -95,10 +109,15 @@ class AppConfig(BaseModel):
 
     def get_effective_config(self, source: SourceConfig) -> Dict[str, Any]:
         """Returns the merged encoding, quality, and destination specs for a given source."""
+        def dump_model(model: Any) -> Dict[str, Any]:
+            if PYDANTIC_V2:
+                return model.model_dump()
+            return model.dict()
+
         result = {
-            "destination": source.destination.model_dump() if source.destination else self.destination.model_dump(),
-            "encoding": self.encoding.model_dump(),
-            "quality": self.quality.model_dump()
+            "destination": dump_model(source.destination) if source.destination else dump_model(self.destination),
+            "encoding": dump_model(self.encoding),
+            "quality": dump_model(self.quality)
         }
         
         if source.encoding:

@@ -32,7 +32,12 @@ class GDriveStorage:
 
     def _select_account(self) -> Optional[dict]:
         for account in self.accounts:
-            account_dict = account.model_dump() if hasattr(account, "model_dump") else account
+            if hasattr(account, "model_dump"):
+                account_dict = account.model_dump()
+            elif hasattr(account, "dict"):
+                account_dict = account.dict()
+            else:
+                account_dict = account
             
             rclone_remote = account_dict.get("rclone_remote")
             quota_gb = account_dict.get("quota_gb", 15)
