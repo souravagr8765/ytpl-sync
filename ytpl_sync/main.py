@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import logging
+import os
 import sys
 import tempfile
 import traceback
@@ -162,7 +163,7 @@ async def run(config: AppConfig, args: argparse.Namespace) -> RunContext:
             sys.exit(1)
             
         sqlite = SQLiteBackend(db_path="~/.ytpl-sync.db")
-        neon = NeonBackend()
+        neon = NeonBackend(dsn=os.environ.get('NEON_DSN'))
         manager = DatabaseManager(sqlite, neon)
         manager.initialize()
         
